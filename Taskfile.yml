@@ -12,19 +12,23 @@ tasks:
   apollo-generate:
     desc: "Generate actual graphql files"
     summary: |
-      Kill specific port.
+      Generate graphql files
 
       EXAMPLE:
-        task kill-port -- 7171
+        ./apollo-ios-cli fetch-schema
+        ./apollo-ios-cli generate
     cmds:
-      - lsof -ti:{{.CLI_ARGS}} | xargs kill -9
+      - ./apollo-ios-cli fetch-schema
+      - ./apollo-ios-cli generate
 
   agents:
-    desc: "Setup Agents"
+    desc: "Setup Agents (run from target project, NOT from toolchain itself)"
+    preconditions:
+      - sh: '[ "$(basename $PWD)" != "Korpu-iOS-Ai-toolchain" ]'
+        msg: "Do not run this inside Korpu-iOS-Ai-toolchain — it will overwrite the original files"
     cmds:
-      - ln -sf ../infa146/.agents .agents
-      - ln -sf ../infa146/AGENTS.md AGENTS.md
-      - ln -sf ../infa146/DOD.md DOD.md
+      - ln -sf ../Korpu-iOS-Ai-toolchain/.agents .agents
+      - ln -sf ../Korpu-iOS-Ai-toolchain/AGENTS.md AGENTS.md
 
   agents-claude:
     desc: "Setup Agents for Claude"
