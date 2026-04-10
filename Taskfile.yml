@@ -1,0 +1,39 @@
+version: '3'
+
+tasks:
+  default:
+    # Эта задача выполняется по умолчанию при вызове 'task' без аргументов.
+    # Она скрыта из списка, так как у нее нет 'desc'.
+    cmds:
+      - task --list
+      - echo "task <name> --summary"
+    silent: true
+
+  apollo-generate:
+    desc: "Generate actual graphql files"
+    summary: |
+      Kill specific port.
+
+      EXAMPLE:
+        task kill-port -- 7171
+    cmds:
+      - lsof -ti:{{.CLI_ARGS}} | xargs kill -9
+
+  agents:
+    desc: "Setup Agents"
+    cmds:
+      - ln -sf ../infa146/.agents .agents
+      - ln -sf ../infa146/AGENTS.md AGENTS.md
+      - ln -sf ../infa146/DOD.md DOD.md
+
+  agents-claude:
+    desc: "Setup Agents for Claude"
+    cmds:
+      - echo '@AGENTS.md' > CLAUDE.md
+      - mkdir -p .claude
+      - ln -sf ../.agents/skills .claude/skills
+
+  agents-codex:
+    desc: "Setup Agents for Codex"
+    cmds:
+      - echo '@AGENTS.md' > CODEX.md
