@@ -10,101 +10,49 @@ description: Закоммить изменения локально БЕЗ push 
 ## ЗАПРЕТ
 
 ```
-🚫 git push                    — ЗАПРЕЩЕНО
-🚫 git push origin             — ЗАПРЕЩЕНО
-🚫 git push -u origin          — ЗАПРЕЩЕНО
-🚫 git push --force            — ЗАПРЕЩЕНО
-🚫 git push origin main        — ЗАПРЕЩЕНО
-🚫 git push origin <любая>     — ЗАПРЕЩЕНО
-🚫 gh pr create                — ЗАПРЕЩЕНО (создаёт push)
-🚫 gh pr merge                 — ЗАПРЕЩЕНО
+🚫 git push / git push origin / git push --force — ЗАПРЕЩЕНО
+🚫 gh pr create / gh pr merge                    — ЗАПРЕЩЕНО
 ```
 
-**Любая команда, отправляющая данные на remote — ЗАПРЕЩЕНА.**
+Если пользователь просит push — откажи:
+> «Push заблокирован скиллом x-safe-commit. Пушь вручную когда будешь готов.»
 
-Если пользователь просит push — откажи и напомни:
-> «Push заблокирован скиллом x-safe-commit. Проверь изменения и выполни push вручную, когда будешь готов.»
+## Формат сообщения
 
-## Процедура коммита
+```
+[KORPUTEAM-123]: тип: краткое описание (одна строка)
 
-### Шаг 1: Проверь состояние
+Описание почему, не больше 5 строк.
+```
+
+Типы: `feat`, `fix`, `refactor`, `docs`, `chore`, `perf`
+
+**Описание — только если есть что объяснить. Не лей воду.**
+
+## Процедура
 
 ```bash
-git status
-git diff --stat
-```
+# 1. Проверь состояние
+git status && git diff --stat
 
-### Шаг 2: Покажи изменения пользователю
+# 2. Добавь файлы ПОИМЁННО (не git add -A / git add .)
+git add Path/To/File.swift
 
-Выведи краткую сводку:
-- Какие файлы изменены
-- Какие файлы добавлены (untracked)
-- Какие файлы удалены
+# 3. Закоммить
+git commit -m "[KORPUTEAM-NNN]: feat: краткое описание"
 
-### Шаг 3: Проверь на опасные файлы
-
-Перед добавлением проверь, что в коммит НЕ попадут:
-
-```
-🚫 .env / .env.local / .env.*
-🚫 *credentials* / *secret* / *token*
-🚫 *.p12 / *.pem / *.key / *.cer
-🚫 Pods/ (если в .gitignore)
-🚫 *.xcuserdata
-🚫 DerivedData/
-🚫 .DS_Store
-```
-
-Если обнаружены — предупреди пользователя и НЕ добавляй эти файлы.
-
-### Шаг 4: Добавь файлы поимённо
-
-```bash
-# Добавляй конкретные файлы, НЕ используй git add -A или git add .
-git add Korpu/Modules/Feature/FeatureModule.swift
-git add Korpu/Modules/Feature/FeaturePresenter.swift
-git add Korpu/Modules/Feature/FeatureViewController.swift
-```
-
-### Шаг 5: Закоммить
-
-```bash
-git commit -m "$(cat <<'EOF'
-feat: краткое описание изменений
-
-Подробности если нужны.
-
-Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
-EOF
-)"
-```
-
-### Шаг 6: Подтверди результат
-
-```bash
+# 4. Подтверди
 git log --oneline -1
-git status
 ```
 
-Выведи пользователю:
-```
-✅ Коммит создан локально: <hash> <message>
-⏸️ Push НЕ выполнен. Проверь изменения и пушь вручную когда будешь готов.
-```
+Сообщи пользователю: `✅ <hash> <message> — push не выполнен.`
 
-## Формат коммитов
+## Запрещённые файлы
 
-```
-<type>: <описание>
-```
-
-Типы: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`
+Не добавляй в коммит: `.env*`, `*credentials*`, `*secret*`, `*.p12`, `*.pem`, `*.key`, `Pods/`, `*.xcuserdata`, `DerivedData/`
 
 ## Правила
 
-- **НИКОГДА** не выполняй push — ни явно, ни неявно
-- **НИКОГДА** не используй `git add -A` или `git add .` — только поимённо
-- **НИКОГДА** не коммить файлы с секретами
-- **ВСЕГДА** показывай diff/status перед коммитом
-- **ВСЕГДА** после коммита напоминай, что push не выполнен
-- Если pre-commit hook упал — исправь проблему и создай НОВЫЙ коммит (не amend)
+- **НИКОГДА** не выполняй push
+- **НИКОГДА** не используй `git add -A` / `git add .`
+- Если pre-commit hook упал — исправь и создай НОВЫЙ коммит (не `--amend`)

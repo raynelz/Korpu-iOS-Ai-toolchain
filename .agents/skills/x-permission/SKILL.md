@@ -201,6 +201,39 @@ import EventKit  // в начало PermissionsManager.swift
 - [ ] Info.plist обновлён с описанием на нужных языках
 - [ ] Протокол `PermissionsProviding` **не изменён** (он generic)
 
+## Открытие системного UI (пикеры камеры/галереи) из модального экрана
+
+### Проблема
+
+`router.present(route:mode:)` внутри берёт `navController.topViewController` как presenter. Если вызывающий экран сам является модалкой (`.pageSheet`, `.fullScreen`), `topViewController` — это VC под ним. iOS **молча игнорирует** `present` на VC, у которого уже есть дочерний `presentedViewController` поверх него.
+
+Типичный симптом: пикер камеры/галереи не открывается, ошибки нет.
+
+### Решение: presentOnHost
+
+Если открываешь системный пикер (камера, галерея, документы и т.п.) из модального экрана — **всегда** используй `presentOnHost`, передав сам модальный VC как `host`:
+
+```swift
+// В Presenter
+private func presentCameraPicker() {
+    guard let host = view else { return }   // view — текущий модальный VC
+    guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+        view?.showNotification(status: .error, title: WarningStrings.unknownError.localized)
+        return
+    }
+    let payload = PickerPayload.Media(...) { [weak self] ... in ... }
+    module?.router.presentOnHost(
+        route: .picker(.media(payload)),
+        host: host,
+        mode: .overFullScreen
+    )
+}
+```
+
+**Признак нужности:** экран открыт через `router.present(...)` (pageSheet / fullScreen / overFullScreen) и из него нужно показать ещё один системный UI.
+
+→ Подробнее о `presentOnHost`: скилл `x-router-navigation`
+
 ## Gotchas
 
 - `PermissionsManager` имеет **дедупликацию запросов** через `inFlightRequests` — повторный запрос того же permission ожидает завершения текущего, а не создаёт новый

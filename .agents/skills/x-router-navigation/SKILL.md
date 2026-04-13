@@ -128,14 +128,21 @@ module?.router.present(
 )
 ```
 
-### Present на конкретном ViewController
+### Present на конкретном ViewController (presentOnHost)
+
+Используй **обязательно**, когда вызывающий VC сам является модалкой (открыт через `.pageSheet`, `.fullScreen` и т.д.). iOS молча игнорирует `present` на VC, у которого уже есть дочерний presentedViewController поверх него.
+
 ```swift
+// В Presenter — получи ссылку на view до вызова
+guard let host = view else { return }
 module?.router.presentOnHost(
     route: .featureName,
-    host: someViewController,
+    host: host,           // host — сам модальный VC
     mode: .overFullScreen
 )
 ```
+
+**Признак нужности:** код вызывается из Presenter/ViewModel экрана, который открыт как модалка (pageSheet / fullScreen / overFullScreen). Типичные кейсы — пикеры (камера, галерея) из `ProfileEditViewController`, `PostCreateViewController` и т.п.
 
 ### Set root (заменить весь стек)
 ```swift
@@ -170,6 +177,7 @@ NavigationContext(
 - **Никогда** `self.present()` из ViewController для навигации к модулям (допустимо для UIKit alert/sheet)
 - **Никогда** передавай сервисы через payload — только данные и callback'и
 - **Никогда** навигируй из View напрямую — делегируй в Presenter/ViewModel
+- **Никогда** используй `router.present(route:mode:)` для открытия route из модального экрана — используй `presentOnHost` с самим модальным VC как host
 
 ## Bottom Sheet через SwiftUI
 

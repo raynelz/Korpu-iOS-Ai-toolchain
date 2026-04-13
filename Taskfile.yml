@@ -29,13 +29,49 @@ tasks:
     cmds:
       - ln -sf ../Korpu-iOS-Ai-toolchain/.agents .agents
       - ln -sf ../Korpu-iOS-Ai-toolchain/AGENTS.md AGENTS.md
+      - |
+        if [ ! -f .serena/project.yml ]; then
+          mkdir -p .serena/memories
+          sed "s/REPLACE_WITH_PROJECT_NAME/$(basename $PWD)/" ../Korpu-iOS-Ai-toolchain/.agents/serena-project-ios.yml > .serena/project.yml
+          echo "✓ .serena/project.yml created for project: $(basename $PWD)"
+        else
+          echo "⚠ .serena/project.yml already exists — skipping"
+        fi
 
   agents-claude:
-    desc: "Setup Agents for Claude"
+    desc: "Setup Agents for Claude (includes Serena + XcodeBuildMCP)"
     cmds:
       - echo '@AGENTS.md' > CLAUDE.md
       - mkdir -p .claude
       - ln -sf ../.agents/skills .claude/skills
+      - |
+        if [ ! -f .mcp.json ]; then
+          cat > .mcp.json << EOF
+        {
+          "mcpServers": {
+            "serena": {
+              "command": "uvx",
+              "args": ["--from", "serena", "serena", "--context", "ide", "--project", "{{.USER_WORKING_DIR}}"]
+            },
+            "XcodeBuildMCP": {
+              "command": "npx",
+              "args": ["-y", "xcodebuildmcp@latest", "mcp"]
+            },
+            "figma": {
+              "command": "npx",
+              "args": ["-y", "figma-developer-mcp", "--stdio"],
+              "env": {
+                "FIGMA_API_KEY": "${FIGMA_API_KEY}"
+              }
+            }
+          }
+        }
+        EOF
+          echo "✓ .mcp.json created with Serena + XcodeBuildMCP + Figma"
+          echo "⚠ Не забудь: export FIGMA_API_KEY=your_token (или добавь в .zshrc)"
+        else
+          echo "⚠ .mcp.json already exists — skipping (add MCPs manually if needed)"
+        fi
 
   agents-codex:
     desc: "Setup Agents for Codex"
