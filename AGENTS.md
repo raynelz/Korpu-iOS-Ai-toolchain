@@ -38,18 +38,22 @@ python3 DesignSystem/tools/generate_typography_tokens.py
 
 ## Design System
 
-| Слой | Токен | Назначение |
-|------|-------|------------|
-| Цвета | `DSBaseVariables.shared.*` | Семантические цвета (`bg.primary`, `text.quindenary`) |
-| Типографика | `DesignSystemTypography.*` | Стили текста (`buttonL`, `titleS`, `textBody1`) |
+Иерархия цветов (использовать в порядке приоритета):
+
+| Уровень | Токен | Назначение |
+| ------- | ----- | ---------- |
+| Semantic base | `PaletteBase.*` | Нейтральные семантические: BG, Text, Icon, Stroke, Border, Primitives, Opacity |
+| Semantic geo | `PaletteGeo.*` | Акцент/бренд/гео-специфичные: кнопки, accent-цвета |
+| Component tokens | `PaletteElements.*` | Состояния компонентов: ButtonPrimary, ButtonDisabled, Input |
+| Module Config/Style | `{Module}Config` / `{Module}Style` | Специфичные для модуля значения, не покрытые выше |
+| Типографика | `DesignSystemTypography.*` | Стили текста (`heading3`, `buttonL`, `textBody1`) |
 | Raw шрифты | `Typography.Primary/Secondary/Display` | Шрифтовые семейства по таргету |
 | Spacing | `DesignSystemDimens.Base.val{N}` | Отступы, padding, gaps |
 | Радиусы | `DesignSystemRadius.val{N}` | Corner radii |
 
-**UIKit:** `DSBaseVariables.shared.text.primary.uiColor`
-**SwiftUI:** `ds.text.primary.color` (где `let ds = DSBaseVariables.shared`)
+**Правило:** если цвет не найден в PaletteBase/PaletteGeo/PaletteElements — добавляй в модульный Config/Style файл (`DialogConfig`, `SignInConfig`, ...), НЕ в Palette-уровень.
 
-**Deprecated** (не использовать в новом коде): `Palette.*`, `PaletteBase.*`, `NeomorphismButton`, `NeomorphismView`, `NeomorphicView`.
+**Deprecated** (не использовать в новом коде): `DSBaseVariables.*`, `Palette.*`, `NeomorphismButton`, `NeomorphismView`, `NeomorphicView`.
 
 → Аудит модуля на DS-соответствие: скилл `x-ds-audit`
 → Работа с цветами/ассетами: скилл `x-palette-manager`
@@ -197,6 +201,7 @@ XcodeBuildMCP даёт прямой доступ к симулятору и Xcod
 | `x-bottom-sheet` | Создание bottom sheet |
 | `x-service-layer` | Создание GraphQL/REST сервиса + регистрация в AppAssembly |
 | `x-ds-audit` | Аудит модуля на соответствие Design System |
+| `x-figma-token-sync` | Синхронизация JSON-токенов проекта с Figma Variables (diff + обновление xcassets) |
 | `x-figma-ds-audit` | Figma-ссылка → проверка цветов/типографики → фикс через DS-токены |
 | `x-swiftlint-check` | Проверка кода на SwiftLint правила |
 | `x-palette-manager` | Работа с цветами, ассетами, тенями |
